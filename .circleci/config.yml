@@ -39,6 +39,7 @@ jobs:
       GOOGLE_COMPUTE_ZONE: ${{ secrets.GOOGLE_COMPUTE_ZONE }}
       GOOGLE_PROJECT_ID: ${{ secrets.GOOGLE_PROJECT_ID }}
       PROJECT_ID: ${{ secrets.PROJECT_ID }}
+      CLOUDSDK_PYTHON: ${{ secrets.CLOUDSDK_PYTHON }}
     steps:
       - checkout
       

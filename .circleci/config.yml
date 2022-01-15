@@ -34,7 +34,6 @@ jobs:
   build-publish:
     executor: gcp-gcr/default
     steps:
-    steps:
       - checkout
       - gcp-gcr/build-image:
           image: orb-test
@@ -48,8 +47,8 @@ jobs:
           command: |
             echo "Digest is: $(</tmp/digest.txt)"
           
-orbs:
-  gcp-gcr: circleci/gcp-gcr@x.y.z
+orbs: 
+  gcp-gcr: circleci/gcp-gcr@0.13.0
           
 workflows:
   version: 2

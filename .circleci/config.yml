@@ -1,0 +1,64 @@
+version: 2.1
+jobs:
+  tests:
+    working_directory: ~/repo
+    docker:
+      - image: circleci/node:10.16.3
+    steps:
+      - checkout
+      - run:
+          name: Install Dependencies
+          command: yarn install
+      - restore_cache:
+          key: dependency-cache-{{ checksum "package-lock.json" }}
+      - save_cache:
+          key: dependency-cache-{{ checksum "package-lock.json" }}
+          paths:
+            - ./node_modules
+      - run:
+          name: Lint
+          command: yarn lint
+      - run:
+          name: Format Check
+          command: yarn format:check
+      - run:
+          name: Test
+          command: yarn test
+      - run:
+          name: Coverage Threshold Check
+          command: yarn test:cov
+      - run:
+          name: End to end test
+          command: yarn test:e2e
+          
+  build-publish:
+    executor: gcp-gcr/default
+    steps:
+      - checkout
+      - gcp-gcr/build-image:
+          image: orb-test
+          no_output_timeout: 20m
+          registry-url: eu.gcr.io
+      - gcp-gcr/push-image:
+          digest-path: /tmp/digest.txt
+          image: orb-test
+          registry-url: eu.gcr.io
+      - run:
+          command: |
+            echo "Digest is: $(</tmp/digest.txt)"
+          
+orbs: 
+  gcp-gcr: circleci/gcp-gcr@0.13.0
+          
+workflows:
+  version: 2
+  test-and-publish:
+    jobs:
+      - tests
+      - build-publish:
+          requires:
+            - tests
+          filters:
+            branches:
+              only: develop
+  

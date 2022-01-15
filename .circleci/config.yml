@@ -31,7 +31,7 @@ jobs:
           name: End to end test
           command: yarn test:e2e
           
-  build-and-push:
+  build-publish:
     executor: gcp-gcr/default
     steps:
     steps:

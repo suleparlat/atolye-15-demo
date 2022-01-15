@@ -5,3 +5,4 @@ RUN yarn install
 COPY . .
 RUN yarn build
 CMD yarn start:dev
+EXPOSE 3000

@@ -31,7 +31,7 @@ jobs:
           name: End to end test
           command: yarn test:e2e
           
-  build_push_image_gcr:
+  build-publish:
     description: Build docker image and push to gcr registry
     executor: machine-executor
     environment:

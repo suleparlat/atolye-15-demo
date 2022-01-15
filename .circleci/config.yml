@@ -41,36 +41,27 @@ jobs:
       PROJECT_ID: ${{ secrets.PROJECT_ID }}
       CLOUDSDK_PYTHON: ${{ secrets.CLOUDSDK_PYTHON }}
       LD_LIBRARY_PATH: ${{ secrets.LD_LIBRARY_PATH }}
+
+    working_directory: ~/repo
+    docker:
+      - image: google/cloud-sdk:latest
     steps:
-      - checkout
-      
+      - setup_remote_docker:
+          docker_layer_caching: true 
+      - attach_workspace:
+          at: ./
+          
       - gcp-gcr/gcr-auth:
           gcloud-service-key: GCLOUD_SERVICE_KEY
           google-project-id: GOOGLE_PROJECT_ID
           google-compute-zone: GOOGLE_COMPUTE_ZONE
+          
+      - run: 
+          name: Build and push the Docker Image to gcloud
+          command: |
+            docker build -t eu.gcr.io/${GOOGLE_PROJECT_ID}/flasky:latest .
+            docker push eu.gcr.io/${GOOGLE_PROJECT_ID}/flasky:latest
 
-      - gcp-gcr/build-image:
-          dockerfile: Dockerfile
-          google-project-id: GOOGLE_PROJECT_ID
-          image: sule
-          registry-url: "gcr.io"
-          tag: latest
-      - gcp-gcr/push-image:
-          google-project-id: GOOGLE_PROJECT_ID
-          image: sule
-          registry-url: "gcr.io"
-          tag: latest
-
-orbs:
-  gcp-gcr: circleci/gcp-gcr@0.6.1
-  cloudrun: circleci/gcp-cloud-run@1.0.1
-  gcp-gke: circleci/gcp-gke@0.2.0
-executors:
-  gcloud-executor:
-    docker:
-      - image: google/cloud-sdk
-  machine-executor:
-    machine: true
           
 workflows:
   version: 2

@@ -40,6 +40,7 @@ jobs:
       GOOGLE_PROJECT_ID: ${{ secrets.GOOGLE_PROJECT_ID }}
       PROJECT_ID: ${{ secrets.PROJECT_ID }}
       CLOUDSDK_PYTHON: ${{ secrets.CLOUDSDK_PYTHON }}
+      LD_LIBRARY_PATH: ${{ secrets.LD_LIBRARY_PATH }}
     steps:
       - checkout
       

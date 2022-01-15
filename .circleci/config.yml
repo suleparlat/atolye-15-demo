@@ -6,6 +6,17 @@ jobs:
       - image: circleci/node:10.16.3
     steps:
       - checkout
+      
+       - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "package.json" }}
+            - v1-dependencies-
+
+       - save_cache:
+          paths:
+            - node_modules
+          key: v1-dependencies-{{ checksum "package.json" }}
+
       - run:
           name: Install Dependencies
           command: yarn install
@@ -42,26 +53,23 @@ jobs:
       CLOUDSDK_PYTHON: ${{ secrets.CLOUDSDK_PYTHON }}
       LD_LIBRARY_PATH: ${{ secrets.LD_LIBRARY_PATH }}
 
-    working_directory: ~/repo
-    docker:
-      - image: google/cloud-sdk:latest
-    steps:
-      - setup_remote_docker:
-          docker_layer_caching: true 
-      - attach_workspace:
-          at: ./
-          
+      - checkout
+      - run:
+          name: Build Docker image 
+          command: docker build --target builder -t suleparlat/atolye-15-demo:lasest . && docker build --target installer -t suleparlat/atolye-15-demo:lasest .
       - gcp-gcr/gcr-auth:
-          gcloud-service-key: GCLOUD_SERVICE_KEY
+          gcloud-service-key: GOOGLE_CLOUD_KEYS
           google-project-id: GOOGLE_PROJECT_ID
           google-compute-zone: GOOGLE_COMPUTE_ZONE
-          
-      - run: 
-          name: Build and push the Docker Image to gcloud
-          command: |
-            docker build -t eu.gcr.io/${GOOGLE_PROJECT_ID}/flasky:latest .
-            docker push eu.gcr.io/${GOOGLE_PROJECT_ID}/flasky:latest
-
+      - cloudrun/deploy:
+          platform: 'managed'
+          image: 'suleparlat/atolye-15-demo:lasest'
+          service-name: 'orb-gcp-cloud-run'
+          region: $GOOGLE_COMPUTE_ZONE
+          unauthenticated: true
+orbs:
+  gcp-gcr: circleci/gcp-gcr@0.6.1
+  cloudrun: circleci/gcp-cloud-run@1.0.0
           
 workflows:
   version: 2

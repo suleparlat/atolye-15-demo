@@ -52,21 +52,21 @@ jobs:
       PROJECT_ID: ${{ secrets.PROJECT_ID }}
       CLOUDSDK_PYTHON: ${{ secrets.CLOUDSDK_PYTHON }}
       LD_LIBRARY_PATH: ${{ secrets.LD_LIBRARY_PATH }}
-
-    - checkout
-    - run:
-        name: Build Docker image 
-        command: docker build --target builder -t suleparlat/atolye-15-demo:lasest . && docker build --target installer -t suleparlat/atolye-15-demo:lasest .
-    - gcp-gcr/gcr-auth:
-        gcloud-service-key: GCLOUD_SERVICE_KEY
-        google-project-id: GOOGLE_PROJECT_ID
-        google-compute-zone: GOOGLE_COMPUTE_ZONE
-    - cloudrun/deploy:
-        platform: 'managed'
-        image: 'suleparlat/atolye-15-demo:lasest'
-        service-name: 'orb-gcp-cloud-run'
-        region: $GOOGLE_COMPUTE_ZONE
-        unauthenticated: true
+    steps:
+      - checkout
+      - run:
+          name: Build Docker image 
+          command: docker build --target builder -t suleparlat/atolye-15-demo:lasest . && docker build --target installer -t suleparlat/atolye-15-demo:lasest .
+      - gcp-gcr/gcr-auth:
+          gcloud-service-key: GCLOUD_SERVICE_KEY
+          google-project-id: GOOGLE_PROJECT_ID
+          google-compute-zone: GOOGLE_COMPUTE_ZONE
+      - cloudrun/deploy:
+          platform: 'managed'
+          image: 'suleparlat/atolye-15-demo:lasest'
+          service-name: 'orb-gcp-cloud-run'
+          region: $GOOGLE_COMPUTE_ZONE
+          unauthenticated: true
 orbs:
   gcp-gcr: circleci/gcp-gcr@0.6.1
   cloudrun: circleci/gcp-cloud-run@1.0.0

@@ -61,7 +61,7 @@ jobs:
           google-compute-zone: GOOGLE_COMPUTE_ZONE
       - cloudrun/deploy:
           platform: 'managed'
-          image: 'suleparlat/atolye-15-demo:latest'
+          image: 'gcr.io./suleparlat/atolye-15-demo:latest'
           service-name: 'orb-gcp-cloud-run'
           region: $GOOGLE_COMPUTE_ZONE
           unauthenticated: true

@@ -69,10 +69,7 @@ jobs:
       - run:
           command: |
               gcloud container clusters get-credentials sule-atolye-15 --zone us-central1-c
-              if [ -n "stage" ]; then
-                set -- "$@" --namespace="stage"
-              fi
-              kubectl set image deployment next-webapp wbapp=gcr.io/${GOOGLE_PROJECT_ID}/suleparlat/atolye-15-demo:latest
+              kubectl set image deployment next-webapp webapp=gcr.io/${GOOGLE_PROJECT_ID}/suleparlat/atolye-15-demo:latest --namespace="stage"
           name: Roll out image
           
 orbs:

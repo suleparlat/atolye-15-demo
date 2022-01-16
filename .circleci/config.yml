@@ -50,7 +50,7 @@ jobs:
     steps:
       - checkout
       - setup_remote_docker:
-          version: 19.03
+          version: 19.03.14
       - gcr/gcr-auth:
           gcloud-service-key: GCLOUD_SERVICE_KEY
           google-compute-zone: GOOGLE_COMPUTE_ZONE

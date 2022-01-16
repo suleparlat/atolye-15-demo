@@ -66,7 +66,7 @@ jobs:
     steps:
       - gcp-gke/install
       - gcp-gke/init
-      - gcp-gke/gke/publish-and-rollout-image:
+      - gcp-gke/publish-and-rollout-image:
           cluster: sule-atolye-15
           container: webapp
           namespace: stage

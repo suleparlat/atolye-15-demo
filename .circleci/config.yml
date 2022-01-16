@@ -51,12 +51,15 @@ jobs:
       
     steps:
       - checkout
+      
       - setup_remote_docker:
           version: 19.03.14
+          
       - gcr/gcr-auth:
           gcloud-service-key: GCLOUD_SERVICE_KEY
           google-compute-zone: GOOGLE_COMPUTE_ZONE
           google-project-id: GOOGLE_PROJECT_ID
+          
       - gcr/build-image:
           dockerfile: Dockerfile
           extra_build_args: '--build-arg MODE=dev'
@@ -64,16 +67,27 @@ jobs:
           image: suleparlat/atolye-15-demo
           registry-url: gcr.io
           tag: latest
+          
       - gcr/push-image:
           google-project-id: GOOGLE_PROJECT_ID
           image: suleparlat/atolye-15-demo
           registry-url: gcr.io
           tag: latest
+          
       - run:
           command: |
               gcloud container clusters get-credentials ${CLUSTER_NAME} --zone ${CLUSTER_ZONE}
               kubectl set image deployment ${DEPLOYMENT_NAME} ${CONTAINER_NAME}=gcr.io/${GOOGLE_PROJECT_ID}/suleparlat/atolye-15-demo:latest --namespace="${NAMESPACE}"
           name: Roll out image
+          
+      - run:
+          command: |
+                curl --request POST \
+                  --url https://api.sendgrid.com/v3/mail/send \
+                  --header "Authorization: Bearer "${SEND_GRID_API_TOKEN}"" \
+                  --header 'Content-Type: application/json' \
+                  --data '{"personalizations": [{"to": [{"email": "suleparlat@gmail.com"}]}],"from": {"email": "suleparlat@gmail.com"},"subject": "Staging Done!","content": [{"type": "text/plain", "value": "The staging pipeline has been done!"}]}'
+          name: Send email
           
   build-publish-deploy-production:
     description: Build docker image and push to gcr registry
@@ -85,12 +99,15 @@ jobs:
      
     steps:
       - checkout
+      
       - setup_remote_docker:
           version: 19.03.14
+          
       - gcr/gcr-auth:
           gcloud-service-key: GCLOUD_SERVICE_KEY
           google-compute-zone: GOOGLE_COMPUTE_ZONE
           google-project-id: GOOGLE_PROJECT_ID
+          
       - gcr/build-image:
           dockerfile: Dockerfile
           extra_build_args: '--build-arg MODE=prod'
@@ -98,16 +115,27 @@ jobs:
           image: suleparlat/atolye-15-demo
           registry-url: gcr.io
           tag: latest
+          
       - gcr/push-image:
           google-project-id: GOOGLE_PROJECT_ID
           image: suleparlat/atolye-15-demo
           registry-url: gcr.io
           tag: latest
+
       - run:
           command: |
               gcloud container clusters get-credentials ${CLUSTER_NAME} --zone ${CLUSTER_ZONE}
               kubectl set image deployment ${DEPLOYMENT_NAME} ${CONTAINER_NAME}=gcr.io/${GOOGLE_PROJECT_ID}/suleparlat/atolye-15-demo:latest --namespace="${NAMESPACE}"
           name: Roll out image
+
+      - run:
+          command: |
+                  curl --request POST \
+                    --url https://api.sendgrid.com/v3/mail/send \
+                    --header "Authorization: Bearer "${SEND_GRID_API_TOKEN}"" \
+                    --header 'Content-Type: application/json' \
+                    --data '{"personalizations": [{"to": [{"email": "suleparlat@gmail.com"}]}],"from": {"email": "suleparlat@gmail.com"},"subject": "Application has been deployed to production!","content": [{"type": "text/plain", "value": "The staging pipeline has been done!"}]}'
+          name: Send email
           
 orbs:
   gcr: circleci/gcp-gcr@0.13.0

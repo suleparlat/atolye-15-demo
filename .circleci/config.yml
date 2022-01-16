@@ -68,6 +68,7 @@ jobs:
           tag: latest
       - run:
           command: |
+              gcloud container clusters get-credentials sule-atolye-15
               if [ -n "stage" ]; then
                 set -- "$@" --namespace="stage"
               fi

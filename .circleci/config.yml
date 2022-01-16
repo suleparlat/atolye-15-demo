@@ -41,52 +41,6 @@ jobs:
       - run:
           name: End to end test
           command: yarn test:e2e
-
-  rollout-image:
-      description: Update a deployment's Docker image.
-      parameters:
-          cluster:
-              description: The Kubernetes cluster name.
-              type: string
-          container:
-              description: The Kubernetes container name.
-              type: string
-          deployment:
-              description: The Kubernetes deployment name.
-              type: string
-          dry-run:
-              default: none
-              description: |
-                  Must be "none", "server", or "client". If client strategy, only print the object that would be sent, without sending it. If server strategy, submit server-side request without persisting the resource.
-              enum:
-                  - none
-                  - server
-                  - client
-              type: enum
-          image:
-              description: A fully-qualified name for your docker image
-              type: string
-          namespace:
-              default: ""
-              description: The Kubernetes namespace name.
-              type: string
-          tag:
-              default: latest
-              description: Docker image tag
-              type: string
-      steps:
-          - update-kubeconfig-with-credentials:
-              cluster: <<parameters.cluster>>
-          - run:
-              command: |
-                  DRY_RUN="<< parameters.dry-run >>"
-                  if [ -n "<<parameters.namespace>>" ]; then
-                    set -- "$@" --namespace="<<parameters.namespace>>"
-                  fi
-                  set -- "$@" "--dry-run=${DRY_RUN}"
-                  kubectl set image deployment <<parameters.deployment>> <<parameters.container>>=<<parameters.image>>:<<parameters.tag>> "$@"
-              name: Roll out image
-              
                 
   build-publish-deploy-stage:
     description: Build docker image and push to gcr registry

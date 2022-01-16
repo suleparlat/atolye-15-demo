@@ -59,6 +59,7 @@ jobs:
           google-project-id: GOOGLE_PROJECT_ID
       - gcr/build-image:
           dockerfile: Dockerfile
+          extra_build_args: '--build-arg MODE=dev'
           google-project-id: GOOGLE_PROJECT_ID
           image: suleparlat/atolye-15-demo
           registry-url: gcr.io
@@ -92,6 +93,7 @@ jobs:
           google-project-id: GOOGLE_PROJECT_ID
       - gcr/build-image:
           dockerfile: Dockerfile
+          extra_build_args: '--build-arg MODE=prod'
           google-project-id: GOOGLE_PROJECT_ID
           image: suleparlat/atolye-15-demo
           registry-url: gcr.io

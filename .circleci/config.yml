@@ -6,6 +6,17 @@ jobs:
       - image: circleci/node:10.16.3
     steps:
       - checkout
+      
+      - restore_cache:
+         keys:
+           - v1-dependencies-{{ checksum "package.json" }}
+           - v1-dependencies-
+
+      - save_cache:
+         paths:
+           - node_modules
+         key: v1-dependencies-{{ checksum "package.json" }}
+
       - run:
           name: Install Dependencies
           command: yarn install
@@ -33,7 +44,8 @@ jobs:
           
   build-publish:
     description: Build docker image and push to gcr registry
-    executor: machine-executor
+    docker:
+      - image: cimg/python:3.10.1
     environment:
       GCLOUD_SERVICE_KEY: ${{ secrets.GCLOUD_SERVICE_KEY }}
       GOOGLE_COMPUTE_ZONE: ${{ secrets.GOOGLE_COMPUTE_ZONE }}
@@ -43,34 +55,22 @@ jobs:
       LD_LIBRARY_PATH: ${{ secrets.LD_LIBRARY_PATH }}
     steps:
       - checkout
-      
+      - run:
+          name: Build Docker image 
+          command: docker build --target builder -t suleparlat/atolye-15-demo:lasest . && docker build --target installer -t suleparlat/atolye-15-demo:lasest .
       - gcp-gcr/gcr-auth:
           gcloud-service-key: GCLOUD_SERVICE_KEY
           google-project-id: GOOGLE_PROJECT_ID
           google-compute-zone: GOOGLE_COMPUTE_ZONE
-
-      - gcp-gcr/build-image:
-          dockerfile: Dockerfile
-          google-project-id: GOOGLE_PROJECT_ID
-          image: sule
-          registry-url: "gcr.io"
-          tag: latest
-      - gcp-gcr/push-image:
-          google-project-id: GOOGLE_PROJECT_ID
-          image: sule
-          registry-url: "gcr.io"
-          tag: latest
-
+      - cloudrun/deploy:
+          platform: 'managed'
+          image: 'suleparlat/atolye-15-demo:lasest'
+          service-name: 'orb-gcp-cloud-run'
+          region: $GOOGLE_COMPUTE_ZONE
+          unauthenticated: true
 orbs:
   gcp-gcr: circleci/gcp-gcr@0.6.1
-  cloudrun: circleci/gcp-cloud-run@1.0.1
-  gcp-gke: circleci/gcp-gke@0.2.0
-executors:
-  gcloud-executor:
-    docker:
-      - image: google/cloud-sdk
-  machine-executor:
-    machine: true
+  cloudrun: circleci/gcp-cloud-run@1.0.0
           
 workflows:
   version: 2

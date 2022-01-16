@@ -64,8 +64,6 @@ jobs:
           image: suleparlat/atolye-15-demo
           registry-url: gcr.io
           tag: latest
-      - update-kubeconfig-with-credentials:
-          cluster: sule-atolye-15
       - run:
           command: |
               if [ -n "stage" ]; then

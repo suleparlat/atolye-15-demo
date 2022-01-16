@@ -75,7 +75,7 @@ jobs:
           tag: 'latest'
 orbs:
   gcp-gcr: circleci/gcp-gcr@0.13.0
-  gcp-gke: circleci/gcp-gke@0.1.0
+  gcp-gke: circleci/gcp-gke@x.y.z
           
 workflows:
   version: 2

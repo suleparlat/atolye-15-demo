@@ -66,13 +66,10 @@ jobs:
     steps:
       - gcp-gke/install
       - gcp-gke/init
-      - gcp-gke/publish-and-rollout-image:
-          cluster: sule-atolye-15
+      - gcp-gke/rollout-image:
           container: webapp
-          namespace: stage
           deployment: next-webapp
-          image: 'gcr.io/${GOOGLE_PROJECT_ID}/suleparlat/atolye-15-demo'
-          tag: 'latest'
+          image: 'gcr.io/${GOOGLE_PROJECT_ID}/suleparlat/atolye-15-demo:latest'
 orbs:
   gcp-gcr: circleci/gcp-gcr@0.13.0
   gcp-gke: circleci/gcp-gke@0.1.0

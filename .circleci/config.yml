@@ -53,7 +53,6 @@ jobs:
           gcloud-service-key: GCLOUD_SERVICE_KEY
           google-compute-zone: GOOGLE_COMPUTE_ZONE
           google-project-id: GOOGLE_PROJECT_ID
-      - install
       - gcr/build-image:
           dockerfile: Dockerfile
           google-project-id: GOOGLE_PROJECT_ID

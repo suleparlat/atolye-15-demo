@@ -57,7 +57,7 @@ jobs:
       - checkout
       - run:
           name: Build Docker image 
-          command: docker build --target builder -t suleparlat/atolye-15-demo:lasest .
+          command: docker build -t suleparlat/atolye-15-demo:lasest .
       - gcp-gcr/gcr-auth:
           gcloud-service-key: GCLOUD_SERVICE_KEY
           google-project-id: GOOGLE_PROJECT_ID

@@ -42,7 +42,7 @@ jobs:
           name: End to end test
           command: yarn test:e2e
           
-  build-publish:
+  build-publish-stage:
     description: Build docker image and push to gcr registry
     docker:
       - image: google/cloud-sdk
@@ -53,26 +53,42 @@ jobs:
           gcloud-service-key: GCLOUD_SERVICE_KEY
           google-project-id: GOOGLE_PROJECT_ID
           google-compute-zone: GOOGLE_COMPUTE_ZONE
-      - cloudrun/build:
+      - gcr/build-image:
           tag: 'gcr.io/${GOOGLE_PROJECT_ID}/suleparlat/atolye-15-demo:latest'
-      - cloudrun/deploy:
-          platform: 'managed'
-          image: 'gcr.io/${GOOGLE_PROJECT_ID}/suleparlat/atolye-15-demo:latest'
-          service-name: 'orb-gcp-cloud-run'
-          region: $GOOGLE_COMPUTE_ZONE
-          unauthenticated: true
+      - gcr/push-image:
+          tag: 'gcr.io/${GOOGLE_PROJECT_ID}/suleparlat/atolye-15-demo:latest'
+           
+  deploy-stage:
+    description: Deploy application to Google Kubernetes Engine Staging
+    machine: true
+    steps:
+      - gcp-gke/install
+      - gcp-gke/init
+      - gcp-gke/rollout-image:
+          cluster: sule-atolye-15
+          container: webapp
+          namespace: stage
+          deployment: next-webapp
+          image: 'gcr.io/${GOOGLE_PROJECT_ID}/suleparlat/atolye-15-demo'
+          tag: 'latest'
 orbs:
   gcp-gcr: circleci/gcp-gcr@0.13.0
-  cloudrun: circleci/gcp-cloud-run@1.0.0
+  gcp-gke: circleci/gcp-gke@0.1.0
           
 workflows:
   version: 2
-  test-and-publish:
+  test-and-publish-stage:
     jobs:
       - tests
-      - build-publish:
+      - build-publish-stage:
           requires:
             - tests
+          filters:
+            branches:
+              only: develop
+      - deploy-stage:
+          requires:
+            - build-publish-stage
           filters:
             branches:
               only: develop

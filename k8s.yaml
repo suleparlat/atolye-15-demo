@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  namespace: stage
+  labels:
+    app: next-webapp
+  name: next-webapp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: next-webapp
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: next-webapp
+    spec:
+      containers:
+      - image: gcr.io/eco-tape-338310/suleparlat/atolye-15-demo:latest
+        name: webapp
+        imagePullPolicy: Always
+        resources: {}
+        ports:
+          - containerPort: 3000 
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: stage
+  name: next-webapp
+  labels:
+    run: next-webapp
+spec:
+  ports:
+  - port: 3000
+    targetPort: 3000
+    protocol: TCP
+  selector:
+    app: next-webapp
+  type: LoadBalancer

@@ -49,16 +49,12 @@ jobs:
      
     steps:
       - checkout
-      - setup_remote_docker:
-          version: 19.03.13
-          docker_layer_caching: false
-      - run:
-          name: Build Docker image 
-          command: docker build -t suleparlat/atolye-15-demo:latest .
       - gcp-gcr/gcr-auth:
           gcloud-service-key: GCLOUD_SERVICE_KEY
           google-project-id: GOOGLE_PROJECT_ID
           google-compute-zone: GOOGLE_COMPUTE_ZONE
+      - cloudrun/build:
+          tag: 'gcr.io/${GOOGLE_PROJECT_ID}/suleparlat/atolye-15-demo:latest'
       - cloudrun/deploy:
           platform: 'managed'
           image: 'gcr.io/${GOOGLE_PROJECT_ID}/suleparlat/atolye-15-demo:latest'

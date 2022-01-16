@@ -54,9 +54,11 @@ jobs:
           google-project-id: GOOGLE_PROJECT_ID
           google-compute-zone: GOOGLE_COMPUTE_ZONE
       - gcp-gcr/build-image:
-          tag: 'gcr.io/${GOOGLE_PROJECT_ID}/suleparlat/atolye-15-demo:latest'
+          image: 'suleparlat/atolye-15-demo'
+          tag: latest
       - gcp-gcr/push-image:
-          tag: 'gcr.io/${GOOGLE_PROJECT_ID}/suleparlat/atolye-15-demo:latest'
+          image: 'suleparlat/atolye-15-demo'
+          tag: latest
            
   deploy-stage:
     description: Deploy application to Google Kubernetes Engine Staging

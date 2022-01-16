@@ -41,7 +41,7 @@ jobs:
       - run:
           name: End to end test
           command: yarn test:e2e
-          
+                
   build-publish-deploy-stage:
     description: Build docker image and push to gcr registry
     docker:
@@ -49,21 +49,31 @@ jobs:
      
     steps:
       - checkout
-      - gcp-gcr/gcr-auth:
+      - gcr/gcr-auth:
           gcloud-service-key: GCLOUD_SERVICE_KEY
-          google-project-id: GOOGLE_PROJECT_ID
           google-compute-zone: GOOGLE_COMPUTE_ZONE
-      - cloudrun/build:
-          tag: 'gcr.io/${GOOGLE_PROJECT_ID}/suleparlat/atolye-15-demo:latest'
-      - cloudrun/deploy:
-          platform: "gke"
-          image: "gcr.io/${GOOGLE_PROJECT_ID}/suleparlat/atolye-15-demo:latest"
-          cluster: sule-atolye-15
-          service-name: next-webapp
-          cluster-location: us-central1-c
+          google-project-id: GOOGLE_PROJECT_ID
+      - gcr/build-image:
+          dockerfile: Dockerfile
+          google-project-id: GOOGLE_PROJECT_ID
+          image: suleparlat/atolye-15-demo
+          registry-url: gcr.io
+          tag: latest
+      - gcr/push-image:
+          google-project-id: GOOGLE_PROJECT_ID
+          image: suleparlat/atolye-15-demo
+          registry-url: gcr.io
+          tag: latest
+      - run:
+          command: |
+              if [ -n "stage" ]; then
+                set -- "$@" --namespace="stage"
+              fi
+              kubectl set image deployment next-webapp wbapp=gcr.io/${GOOGLE_PROJECT_ID}/suleparlat/atolye-15-demo:latest
+          name: Roll out image
           
 orbs:
-  gcp-gcr: circleci/gcp-gcr@0.13.0
+  gcr: circleci/gcp-gcr@0.13.0
   gcp-gke: circleci/gcp-gke@0.1.0
   cloudrun: circleci/gcp-cloud-run@1.0.0
           
@@ -78,5 +88,3 @@ workflows:
           filters:
             branches:
               only: develop
-
-  

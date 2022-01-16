@@ -53,9 +53,9 @@ jobs:
           gcloud-service-key: GCLOUD_SERVICE_KEY
           google-project-id: GOOGLE_PROJECT_ID
           google-compute-zone: GOOGLE_COMPUTE_ZONE
-      - gcr/build-image:
+      - gcp-gcr/build-image:
           tag: 'gcr.io/${GOOGLE_PROJECT_ID}/suleparlat/atolye-15-demo:latest'
-      - gcr/push-image:
+      - gcp-gcr/push-image:
           tag: 'gcr.io/${GOOGLE_PROJECT_ID}/suleparlat/atolye-15-demo:latest'
            
   deploy-stage:

@@ -46,6 +46,41 @@ jobs:
     description: Build docker image and push to gcr registry
     docker:
       - image: google/cloud-sdk
+    environment:
+      NAMESPACE=stage
+      
+    steps:
+      - checkout
+      - setup_remote_docker:
+          version: 19.03.14
+      - gcr/gcr-auth:
+          gcloud-service-key: GCLOUD_SERVICE_KEY
+          google-compute-zone: GOOGLE_COMPUTE_ZONE
+          google-project-id: GOOGLE_PROJECT_ID
+      - gcr/build-image:
+          dockerfile: Dockerfile
+          google-project-id: GOOGLE_PROJECT_ID
+          image: suleparlat/atolye-15-demo
+          registry-url: gcr.io
+          tag: latest
+      - gcr/push-image:
+          google-project-id: GOOGLE_PROJECT_ID
+          image: suleparlat/atolye-15-demo
+          registry-url: gcr.io
+          tag: latest
+      - run:
+          command: |
+              gcloud container clusters get-credentials ${CLUSTER_NAME} --zone ${CLUSTER_ZONE}
+              kubectl set image deployment ${DEPLOYMENT_NAME} ${CONTAINER_NAME}=gcr.io/${GOOGLE_PROJECT_ID}/suleparlat/atolye-15-demo:latest --namespace="${NAMESPACE}"
+          name: Roll out image
+          
+  build-publish-deploy-production:
+    description: Build docker image and push to gcr registry
+    docker:
+      - image: google/cloud-sdk
+     
+    environment:
+      NAMESPACE=production
      
     steps:
       - checkout
@@ -68,8 +103,8 @@ jobs:
           tag: latest
       - run:
           command: |
-              gcloud container clusters get-credentials sule-atolye-15 --zone us-central1-c
-              kubectl set image deployment next-webapp webapp=gcr.io/${GOOGLE_PROJECT_ID}/suleparlat/atolye-15-demo:latest --namespace="stage"
+              gcloud container clusters get-credentials ${CLUSTER_NAME} --zone ${CLUSTER_ZONE}
+              kubectl set image deployment ${DEPLOYMENT_NAME} ${CONTAINER_NAME}=gcr.io/${GOOGLE_PROJECT_ID}/suleparlat/atolye-15-demo:latest --namespace="${NAMESPACE}"
           name: Roll out image
           
 orbs:
@@ -88,3 +123,10 @@ workflows:
           filters:
             branches:
               only: develop
+      - build-publish-deploy-production:
+          requires:
+            - tests
+          filters:
+            branches:
+              only: main
+
